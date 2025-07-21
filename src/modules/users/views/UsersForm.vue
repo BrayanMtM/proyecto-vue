@@ -89,6 +89,7 @@ const editIndex = ref<number | null>(null)
 function handleSubmit() {
   let valid = true
 
+  // Validaciones
   if (!formData.nombre.trim()) {
     errors.nombre = 'El nombre es requerido.'
     valid = false
@@ -112,6 +113,18 @@ function handleSubmit() {
 
   if (!valid) return
 
+  // Validar que el correo no se repita
+  const correoExistente = users.some((user, i) =>
+    user.correo.toLowerCase() === formData.correo.toLowerCase() &&
+    i !== editIndex.value
+  )
+
+  if (correoExistente) {
+    errors.correo = 'Ya existe un usuario con este correo.'
+    return
+  }
+
+  // actualizar usuario
   if (editIndex.value !== null) {
     userStore.updateUser(editIndex.value, { ...formData })
     editIndex.value = null
@@ -119,9 +132,11 @@ function handleSubmit() {
     userStore.addUser({ ...formData })
   }
 
+
   Object.assign(formData, { ...formProps })
   Object.assign(errors, { ...formProps })
 }
+
 
 function editUser(index: number) {
   const user = users[index]
@@ -131,6 +146,7 @@ function editUser(index: number) {
   editIndex.value = index
 }
 
+// Eliminar usuario
 function deleteUser(index: number) {
   userStore.deleteUser(index)
   if (editIndex.value === index) {
